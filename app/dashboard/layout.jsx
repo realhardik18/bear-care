@@ -67,13 +67,16 @@ export default function DashboardLayout({
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start text-white hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:translate-x-1",
-                  pathname === item.href && "bg-white/20 scale-105 border border-white/20",
+                  "w-full justify-start text-white/80 hover:text-white hover:bg-white/15 transition-all duration-300 hover:scale-105 hover:translate-x-1",
+                  pathname === item.href && "bg-white/20 scale-105 border border-white/20 text-white",
                   collapsed && "px-2",
                 )}
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
-                <item.icon className="h-5 w-5 transition-transform duration-300" />
+                <item.icon className={cn(
+                  "h-5 w-5 transition-transform duration-300",
+                  pathname === item.href ? "text-white" : "text-white/80"
+                )} />
                 {!collapsed && <span className="ml-3 transition-opacity duration-300">{item.label}</span>}
               </Button>
             </Link>
@@ -86,8 +89,8 @@ export default function DashboardLayout({
             <Button
               variant="ghost"
               className={cn(
-                "w-full justify-start text-white hover:bg-white/10 transition-all duration-300 hover:scale-105",
-                pathname === "/dashboard/profile" && "bg-white/20 scale-105 border border-white/20",
+                "w-full justify-start text-white/80 hover:text-white hover:bg-white/15 transition-all duration-300 hover:scale-105",
+                pathname === "/dashboard/profile" && "bg-white/20 scale-105 border border-white/20 text-white",
                 collapsed && "px-2",
               )}
             >
