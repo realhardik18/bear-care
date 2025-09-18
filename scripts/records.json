@@ -1,0 +1,432 @@
+[
+  {
+    "id": 1,
+    "resourceType": "Observation",
+    "description": "Blood pressure reading 120/80 mmHg, stable",
+    "value": "120/80",
+    "unit": "mmHg",
+    "date": "2025-01-12"
+  },
+  {
+    "id": 2,
+    "resourceType": "Observation",
+    "description": "Fasting blood sugar level",
+    "value": 95,
+    "unit": "mg/dL",
+    "date": "2025-02-03"
+  },
+  {
+    "id": 3,
+    "resourceType": "Condition",
+    "description": "Diagnosed with mild seasonal allergic rhinitis",
+    "date": "2024-12-28"
+  },
+  {
+    "id": 4,
+    "resourceType": "Procedure",
+    "description": "Underwent routine dental cleaning",
+    "date": "2025-03-01"
+  },
+  {
+    "id": 5,
+    "resourceType": "AllergyIntolerance",
+    "description": "Reported allergy to penicillin, causes rash",
+    "date": "2024-11-14"
+  },
+  {
+    "id": 6,
+    "resourceType": "Observation",
+    "description": "Heart rate measured",
+    "value": 78,
+    "unit": "bpm",
+    "date": "2025-02-20"
+  },
+  {
+    "id": 7,
+    "resourceType": "Condition",
+    "description": "Diagnosed with type 2 diabetes, managed with diet",
+    "date": "2024-10-05"
+  },
+  {
+    "id": 8,
+    "resourceType": "Procedure",
+    "description": "Appendectomy performed successfully",
+    "date": "2023-11-25"
+  },
+  {
+    "id": 9,
+    "resourceType": "Observation",
+    "description": "Cholesterol level",
+    "value": 180,
+    "unit": "mg/dL",
+    "date": "2025-01-18"
+  },
+  {
+    "id": 10,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergy to peanuts causing hives",
+    "date": "2024-12-09"
+  },
+  {
+    "id": 11,
+    "resourceType": "Condition",
+    "description": "Diagnosed with hypertension, mild stage",
+    "date": "2025-02-14"
+  },
+  {
+    "id": 12,
+    "resourceType": "Observation",
+    "description": "BMI calculated",
+    "value": 27.5,
+    "unit": "kg/m²",
+    "date": "2025-01-30"
+  },
+  {
+    "id": 13,
+    "resourceType": "Procedure",
+    "description": "Completed cataract surgery on right eye",
+    "date": "2024-09-15"
+  },
+  {
+    "id": 14,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergic to shellfish, triggers nausea and swelling",
+    "date": "2024-08-03"
+  },
+  {
+    "id": 15,
+    "resourceType": "Observation",
+    "description": "Temperature recorded",
+    "value": 100.2,
+    "unit": "°F",
+    "date": "2025-02-11"
+  },
+  {
+    "id": 16,
+    "resourceType": "Condition",
+    "description": "Diagnosed with asthma, mild persistent",
+    "date": "2024-07-22"
+  },
+  {
+    "id": 17,
+    "resourceType": "Procedure",
+    "description": "Vaccinated with seasonal flu shot",
+    "date": "2025-01-10"
+  },
+  {
+    "id": 18,
+    "resourceType": "Observation",
+    "description": "Oxygen saturation measured",
+    "value": 96,
+    "unit": "%",
+    "date": "2025-02-28"
+  },
+  {
+    "id": 19,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergic to latex gloves, causes itching",
+    "date": "2024-06-16"
+  },
+  {
+    "id": 20,
+    "resourceType": "Condition",
+    "description": "Diagnosed with migraine headaches, episodic",
+    "date": "2025-01-05"
+  },
+  {
+    "id": 21,
+    "resourceType": "Observation",
+    "description": "Weight recorded",
+    "value": 162,
+    "unit": "lbs",
+    "date": "2025-03-02"
+  },
+  {
+    "id": 22,
+    "resourceType": "Condition",
+    "description": "Diagnosed with gastroesophageal reflux disease (GERD)",
+    "date": "2025-01-15"
+  },
+  {
+    "id": 23,
+    "resourceType": "Procedure",
+    "description": "Skin biopsy performed, results pending",
+    "date": "2025-02-05"
+  },
+  {
+    "id": 24,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergic to sulfa drugs, causes hives",
+    "date": "2024-11-27"
+  },
+  {
+    "id": 25,
+    "resourceType": "Observation",
+    "description": "Respiratory rate measured",
+    "value": 18,
+    "unit": "breaths/min",
+    "date": "2025-02-25"
+  },
+  {
+    "id": 26,
+    "resourceType": "Condition",
+    "description": "History of mild depression, under counseling",
+    "date": "2024-12-22"
+  },
+  {
+    "id": 27,
+    "resourceType": "Procedure",
+    "description": "Colonoscopy performed, no abnormalities detected",
+    "date": "2024-09-19"
+  },
+  {
+    "id": 28,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergy to cat dander, triggers sneezing and asthma",
+    "date": "2024-10-11"
+  },
+  {
+    "id": 29,
+    "resourceType": "Observation",
+    "description": "Hemoglobin measured",
+    "value": 13.5,
+    "unit": "g/dL",
+    "date": "2025-03-04"
+  },
+  {
+    "id": 30,
+    "resourceType": "Condition",
+    "description": "Diagnosed with osteoarthritis of left knee",
+    "date": "2025-01-20"
+  },
+  {
+    "id": 31,
+    "resourceType": "Observation",
+    "description": "Blood pressure reading 135/85 mmHg",
+    "value": "135/85",
+    "unit": "mmHg",
+    "date": "2025-01-22"
+  },
+  {
+    "id": 32,
+    "resourceType": "Observation",
+    "description": "Fasting blood glucose level",
+    "value": 110,
+    "unit": "mg/dL",
+    "date": "2025-02-01"
+  },
+  {
+    "id": 33,
+    "resourceType": "Condition",
+    "description": "Diagnosed with chronic sinusitis",
+    "date": "2025-01-18"
+  },
+  {
+    "id": 34,
+    "resourceType": "Procedure",
+    "description": "Knee arthroscopy performed",
+    "date": "2024-12-05"
+  },
+  {
+    "id": 35,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergy to ibuprofen causing swelling",
+    "date": "2024-11-29"
+  },
+  {
+    "id": 36,
+    "resourceType": "Observation",
+    "description": "Heart rate measured",
+    "value": 82,
+    "unit": "bpm",
+    "date": "2025-02-07"
+  },
+  {
+    "id": 37,
+    "resourceType": "Condition",
+    "description": "History of chronic obstructive pulmonary disease (COPD)",
+    "date": "2025-01-12"
+  },
+  {
+    "id": 38,
+    "resourceType": "Procedure",
+    "description": "Gallbladder removal surgery",
+    "date": "2024-10-20"
+  },
+  {
+    "id": 39,
+    "resourceType": "Observation",
+    "description": "LDL cholesterol level",
+    "value": 145,
+    "unit": "mg/dL",
+    "date": "2025-02-10"
+  },
+  {
+    "id": 40,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergy to strawberries, causes skin rash",
+    "date": "2024-09-14"
+  },
+  {
+    "id": 41,
+    "resourceType": "Condition",
+    "description": "Diagnosed with anemia, iron deficiency type",
+    "date": "2024-11-21"
+  },
+  {
+    "id": 42,
+    "resourceType": "Observation",
+    "description": "Body weight recorded",
+    "value": 148,
+    "unit": "lbs",
+    "date": "2025-02-25"
+  },
+  {
+    "id": 43,
+    "resourceType": "Procedure",
+    "description": "Endoscopy performed, gastritis detected",
+    "date": "2025-01-09"
+  },
+  {
+    "id": 44,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergic to dust mites, triggers asthma",
+    "date": "2024-07-12"
+  },
+  {
+    "id": 45,
+    "resourceType": "Observation",
+    "description": "Body temperature recorded",
+    "value": 98.6,
+    "unit": "°F",
+    "date": "2025-02-16"
+  },
+  {
+    "id": 46,
+    "resourceType": "Condition",
+    "description": "Diagnosed with chronic kidney disease, stage 2",
+    "date": "2024-12-30"
+  },
+  {
+    "id": 47,
+    "resourceType": "Procedure",
+    "description": "Hip replacement surgery completed",
+    "date": "2023-08-25"
+  },
+  {
+    "id": 48,
+    "resourceType": "Observation",
+    "description": "Oxygen saturation measured",
+    "value": 94,
+    "unit": "%",
+    "date": "2025-01-29"
+  },
+  {
+    "id": 49,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergy to aspirin, causes stomach upset",
+    "date": "2024-06-18"
+  },
+  {
+    "id": 50,
+    "resourceType": "Condition",
+    "description": "Diagnosed with psoriasis, moderate severity",
+    "date": "2025-02-02"
+  },
+  {
+    "id": 51,
+    "resourceType": "Observation",
+    "description": "Respiratory rate recorded",
+    "value": 20,
+    "unit": "breaths/min",
+    "date": "2025-02-20"
+  },
+  {
+    "id": 52,
+    "resourceType": "Condition",
+    "description": "Diagnosed with generalized anxiety disorder",
+    "date": "2024-12-11"
+  },
+  {
+    "id": 53,
+    "resourceType": "Procedure",
+    "description": "Tonsillectomy performed in childhood",
+    "date": "2015-06-03"
+  },
+  {
+    "id": 54,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergic to bee stings, risk of anaphylaxis",
+    "date": "2024-08-19"
+  },
+  {
+    "id": 55,
+    "resourceType": "Observation",
+    "description": "Hemoglobin A1c level",
+    "value": 6.8,
+    "unit": "%",
+    "date": "2025-02-12"
+  },
+  {
+    "id": 56,
+    "resourceType": "Condition",
+    "description": "Diagnosed with obesity, BMI > 30",
+    "date": "2025-01-08"
+  },
+  {
+    "id": 57,
+    "resourceType": "Procedure",
+    "description": "Coronary angioplasty completed",
+    "date": "2024-04-15"
+  },
+  {
+    "id": 58,
+    "resourceType": "Observation",
+    "description": "Triglyceride level measured",
+    "value": 175,
+    "unit": "mg/dL",
+    "date": "2025-02-26"
+  },
+  {
+    "id": 59,
+    "resourceType": "AllergyIntolerance",
+    "description": "Allergic to eggs, mild gastrointestinal reaction",
+    "date": "2024-11-03"
+  },
+  {
+    "id": 60,
+    "resourceType": "Condition",
+    "description": "Diagnosed with hypothyroidism",
+    "date": "2025-01-14"
+  },
+  { "id": 10, "resourceType": "Observation", "description": "Blood pressure reading", "value": "138/90", "unit": "mmHg", "date": "2024-05-12" },
+  { "id": 10, "resourceType": "Observation", "description": "Blood pressure reading", "value": "142/92", "unit": "mmHg", "date": "2024-06-12" },
+  { "id": 10, "resourceType": "Observation", "description": "Blood pressure reading", "value": "135/88", "unit": "mmHg", "date": "2024-07-12" },
+  { "id": 10, "resourceType": "Observation", "description": "Heart rate measured", "value": 80, "unit": "bpm", "date": "2024-07-12" },
+  { "id": 10, "resourceType": "Observation", "description": "Blood pressure reading", "value": "145/95", "unit": "mmHg", "date": "2024-08-12" },
+  { "id": 10, "resourceType": "Observation", "description": "Heart rate measured", "value": 85, "unit": "bpm", "date": "2024-08-12" },
+  { "id": 10, "resourceType": "Observation", "description": "Blood pressure reading", "value": "140/90", "unit": "mmHg", "date": "2024-09-12" },
+  { "id": 10, "resourceType": "Observation", "description": "Blood pressure reading", "value": "138/88", "unit": "mmHg", "date": "2024-10-12" },
+  { "id": 10, "resourceType": "Observation", "description": "Heart rate measured", "value": 78, "unit": "bpm", "date": "2024-10-12" },
+  { "id": 10, "resourceType": "Observation", "description": "Blood pressure reading", "value": "136/87", "unit": "mmHg", "date": "2024-11-12" },
+  { "id": 20, "resourceType": "Observation", "description": "Fasting glucose level", "value": 130, "unit": "mg/dL", "date": "2024-04-05" },
+  { "id": 20, "resourceType": "Observation", "description": "HbA1c level", "value": 7.0, "unit": "%", "date": "2024-04-05" },
+  { "id": 20, "resourceType": "Observation", "description": "Fasting glucose level", "value": 125, "unit": "mg/dL", "date": "2024-06-05" },
+  { "id": 20, "resourceType": "Observation", "description": "Fasting glucose level", "value": 140, "unit": "mg/dL", "date": "2024-07-05" },
+  { "id": 20, "resourceType": "Observation", "description": "HbA1c level", "value": 7.2, "unit": "%", "date": "2024-07-05" },
+  { "id": 20, "resourceType": "Observation", "description": "Fasting glucose level", "value": 135, "unit": "mg/dL", "date": "2024-08-05" },
+  { "id": 20, "resourceType": "Observation", "description": "Fasting glucose level", "value": 128, "unit": "mg/dL", "date": "2024-09-05" },
+  { "id": 20, "resourceType": "Observation", "description": "HbA1c level", "value": 7.1, "unit": "%", "date": "2024-10-05" },
+  { "id": 20, "resourceType": "Observation", "description": "Fasting glucose level", "value": 132, "unit": "mg/dL", "date": "2024-11-05" },
+  { "id": 20, "resourceType": "Observation", "description": "Fasting glucose level", "value": 126, "unit": "mg/dL", "date": "2024-12-05" },
+  { "id": 40, "resourceType": "Observation", "description": "Total cholesterol level", "value": 220, "unit": "mg/dL", "date": "2024-02-10" },
+  { "id": 40, "resourceType": "Observation", "description": "Triglyceride level", "value": 190, "unit": "mg/dL", "date": "2024-02-10" },
+  { "id": 40, "resourceType": "Observation", "description": "Total cholesterol level", "value": 215, "unit": "mg/dL", "date": "2024-04-10" },
+  { "id": 40, "resourceType": "Observation", "description": "Triglyceride level", "value": 200, "unit": "mg/dL", "date": "2024-04-10" },
+  { "id": 40, "resourceType": "Observation", "description": "Total cholesterol level", "value": 225, "unit": "mg/dL", "date": "2024-06-10" },
+  { "id": 40, "resourceType": "Observation", "description": "Triglyceride level", "value": 185, "unit": "mg/dL", "date": "2024-06-10" },
+  { "id": 40, "resourceType": "Observation", "description": "Total cholesterol level", "value": 210, "unit": "mg/dL", "date": "2024-08-10" },
+  { "id": 40, "resourceType": "Observation", "description": "Triglyceride level", "value": 175, "unit": "mg/dL", "date": "2024-08-10" },
+  { "id": 40, "resourceType": "Observation", "description": "Total cholesterol level", "value": 205, "unit": "mg/dL", "date": "2024-10-10" },
+  { "id": 40, "resourceType": "Observation", "description": "Triglyceride level", "value": 170, "unit": "mg/dL", "date": "2024-10-10" }
+]
