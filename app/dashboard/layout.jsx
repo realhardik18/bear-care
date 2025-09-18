@@ -15,8 +15,8 @@ const sidebarItems = [
   { icon: Home, label: "Dashboard", href: "/dashboard" },
   { icon: MessageCircle, label: "Chat", href: "/dashboard/chat" },
   { icon: Users, label: "Patients", href: "/dashboard/patients" },
-  { icon: Clock, label: "Timeline", href: "/dashboard/timeline" },
   { icon: Search, label: "Search", href: "/dashboard/search" },
+  { icon: Clock, label: "Timeline", href: "/dashboard/timeline" },
   { icon: Upload, label: "Upload Data", href: "/dashboard/upload" },
 ]
 

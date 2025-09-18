@@ -1,54 +1,50 @@
 "use client"
 
-import React, { useState, useCallback } from "react"
+import React, { useState, useCallback, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Upload, ImageIcon, Database, CheckCircle, AlertCircle, Clock, X, Brain, Zap, Shield } from "lucide-react"
+import { Upload, ImageIcon, Clock, X, Brain, Zap, Shield } from "lucide-react"
+import { toast } from "sonner" // Replace useToast with sonner
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function UploadPage() {
-  const [uploadedFiles, setUploadedFiles] = useState([
-    {
-      id: "1",
-      name: "patient_records_march_2025.csv",
-      size: 2048576,
-      type: "text/csv",
-      status: "completed",
-      progress: 100,
-      uploadedAt: new Date("2025-03-15T10:30:00"),
-      processedData: {
-        recordsFound: 156,
-        patientsAffected: 89,
-        dataType: "Patient Demographics",
-      },
-    },
-    {
-      id: "2",
-      name: "lab_results_batch_1.json",
-      size: 1536000,
-      type: "application/json",
-      status: "completed",
-      progress: 100,
-      uploadedAt: new Date("2025-03-14T14:20:00"),
-      processedData: {
-        recordsFound: 234,
-        patientsAffected: 67,
-        dataType: "Laboratory Results",
-      },
-    },
-    {
-      id: "3",
-      name: "medication_history.xml",
-      size: 3072000,
-      type: "application/xml",
-      status: "processing",
-      progress: 65,
-      uploadedAt: new Date("2025-03-15T11:45:00"),
-    },
-  ])
-
+  const [uploadedFiles, setUploadedFiles] = useState([])
   const [dragActive, setDragActive] = useState(false)
+  const [dataType, setDataType] = useState("record") // Default to "record"
+  const [isUploading, setIsUploading] = useState(false)
+
+  // Fetch existing uploads on component mount
+  useEffect(() => {
+    fetchUploads()
+  }, [])
+
+  const fetchUploads = async () => {
+    try {
+      const response = await fetch("/api/uploads")
+      if (response.ok) {
+        const data = await response.json()
+        const formattedUploads = data.map((upload) => ({
+          id: upload._id,
+          name: `${upload.type}_upload_${new Date(upload.date).toLocaleDateString()}.json`,
+          size: upload.itemCount * 1024, // Rough estimation
+          type: "application/json",
+          status: upload.status,
+          progress: 100,
+          uploadedAt: new Date(upload.createdAt),
+          processedData: {
+            recordsFound: upload.itemCount,
+            patientsAffected: upload.itemCount,
+            dataType: upload.type === "patient" ? "Patient Demographics" : "Medical Records",
+          },
+        }))
+        setUploadedFiles(formattedUploads)
+      }
+    } catch (error) {
+      console.error("Error fetching uploads:", error)
+    }
+  }
 
   const handleDrag = useCallback((e) => {
     e.preventDefault()
@@ -60,73 +56,166 @@ export default function UploadPage() {
     }
   }, [])
 
-  const handleDrop = useCallback((e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
+  // Define handleFiles before it's used in handleDrop
+  const handleFiles = async (files) => {
+    setIsUploading(true)
+    const fileArray = Array.from(files)
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFiles(e.dataTransfer.files)
+    // Only process JSON files - strictly check for .json extension
+    const jsonFiles = fileArray.filter(file => file.name.endsWith('.json'))
+
+    if (jsonFiles.length === 0) {
+      toast.error("Invalid file format", {
+        description: "Please upload only .json files",
+      })
+      setIsUploading(false)
+      return
     }
-  }, [])
 
-  const handleFiles = (files) => {
-    Array.from(files).forEach((file) => {
-      const newFile = {
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        status: "uploading",
-        progress: 0,
-        uploadedAt: new Date(),
+    // Validate data type selection
+    if (!dataType || (dataType !== "patient" && dataType !== "record")) {
+      toast.error("Invalid data type", {
+        description: "Please select either 'Patient Data' or 'Medical Records' type",
+      })
+      setIsUploading(false)
+      return
+    }
+
+    // Create temporary file records
+    const tempFiles = jsonFiles.map((file) => ({
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      name: file.name,
+      originalName: file.name, // Store original filename
+      size: file.size,
+      type: file.type,
+      status: "uploading",
+      progress: 0,
+      uploadedAt: new Date(),
+      file: file, // Store the actual file
+    }))
+
+    setUploadedFiles((prev) => [...tempFiles, ...prev])
+
+    // Process each file
+    for (const fileData of tempFiles) {
+      try {
+        // Update progress to 25% - Reading file
+        updateFileProgress(fileData.id, 25, "uploading")
+
+        // Read the file content
+        const fileContent = await readFileAsJson(fileData.file)
+
+        // Validate the file content
+        if (!Array.isArray(fileContent)) {
+          throw new Error("File must contain a JSON array")
+        }
+
+        // Update progress to 50% - Validating data
+        updateFileProgress(fileData.id, 50, "processing")
+
+        // Prepare upload data
+        const uploadData = {
+          date: new Date().toISOString(),
+          type: dataType,
+          filename: fileData.originalName, // Include original filename
+          items: fileContent,
+        }
+
+        // Update progress to 75% - Sending to server
+        updateFileProgress(fileData.id, 75, "processing")
+
+        // Send to server
+        const response = await fetch("/api/uploads", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(uploadData),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || "Failed to upload file")
+        }
+
+        const result = await response.json()
+
+        // Update file status to complete
+        updateFileProgress(fileData.id, 100, "completed", {
+          recordsFound: result.totalItems,
+          patientsAffected: result.processedItems,
+          dataType: dataType === "patient" ? "Patient Demographics" : "Medical Records",
+          filename: fileData.originalName, // Include filename in processed data
+        })
+
+        // Show appropriate success or partial success message
+        if (result.failedItems > 0) {
+          toast.warning("Upload partially successful", {
+            description: `Processed ${result.processedItems} of ${result.totalItems} items. ${result.failedItems} items failed.`,
+          })
+        } else {
+          toast.success("Upload successful", {
+            description: `Processed ${result.processedItems} items of type ${result.type}`,
+          })
+        }
+      } catch (error) {
+        console.error("Error processing file:", error)
+        updateFileProgress(fileData.id, 100, "error")
+
+        toast.error("Upload failed", {
+          description: error.message,
+        })
       }
+    }
 
-      setUploadedFiles((prev) => [newFile, ...prev])
+    setIsUploading(false)
+    // Refresh the uploads list
+    fetchUploads()
+  }
 
-      // Simulate upload progress
-      const interval = setInterval(() => {
-        setUploadedFiles((prev) =>
-          prev.map((f) => {
-            if (f.id === newFile.id) {
-              const newProgress = Math.min(f.progress + Math.random() * 20, 100)
-              const newStatus = newProgress === 100 ? "processing" : "uploading"
-              return { ...f, progress: newProgress, status: newStatus }
-            }
-            return f
-          }),
-        )
-      }, 500)
+  const handleDrop = useCallback(
+    (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setDragActive(false)
 
-      // Simulate processing completion
-      setTimeout(() => {
-        clearInterval(interval)
-        setUploadedFiles((prev) =>
-          prev.map((f) => {
-            if (f.id === newFile.id) {
-              return {
-                ...f,
-                status: "completed",
-                progress: 100,
-                processedData: {
-                  recordsFound: Math.floor(Math.random() * 200) + 50,
-                  patientsAffected: Math.floor(Math.random() * 100) + 20,
-                  dataType: getDataType(file.type),
-                },
-              }
-            }
-            return f
-          }),
-        )
-      }, 8000)
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFiles(e.dataTransfer.files)
+      }
+    },
+    [], // Remove handleFiles from dependency array since it's now defined above
+  )
+
+  const readFileAsJson = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result)
+          resolve(data)
+        } catch (error) {
+          reject(new Error("Invalid JSON file"))
+        }
+      }
+      reader.onerror = () => reject(new Error("Failed to read file"))
+      reader.readAsText(file)
     })
   }
 
-  const getDataType = (fileType) => {
-    if (fileType.includes("csv")) return "Patient Demographics"
-    if (fileType.includes("json")) return "Laboratory Results"
-    if (fileType.includes("xml")) return "Medical Records"
-    return "Healthcare Data"
+  const updateFileProgress = (id, progress, status, processedData = null) => {
+    setUploadedFiles((prev) =>
+      prev.map((f) => {
+        if (f.id === id) {
+          return {
+            ...f,
+            progress,
+            status,
+            ...(processedData ? { processedData } : {}),
+          }
+        }
+        return f
+      }),
+    )
   }
 
   const formatFileSize = (bytes) => {
@@ -140,12 +229,12 @@ export default function UploadPage() {
   const getStatusIcon = (status) => {
     switch (status) {
       case "completed":
-        return <CheckCircle className="h-5 w-5 text-green-400" />
+        return <Shield className="h-5 w-5 text-green-400" />
       case "processing":
       case "uploading":
         return <Clock className="h-5 w-5 text-yellow-400" />
       case "error":
-        return <AlertCircle className="h-5 w-5 text-red-400" />
+        return <X className="h-5 w-5 text-red-400" />
       default:
         return <ImageIcon className="h-5 w-5 text-gray-400" />
     }
@@ -171,28 +260,24 @@ export default function UploadPage() {
   }
 
   const supportedFormats = [
-    { name: "CSV Files", extension: ".csv", description: "Patient demographics, vital signs" },
-    { name: "JSON Files", extension: ".json", description: "Lab results, API responses" },
-    { name: "XML Files", extension: ".xml", description: "FHIR records, medical documents" },
-    { name: "PDF Files", extension: ".pdf", description: "Medical reports, prescriptions" },
-    { name: "Excel Files", extension: ".xlsx", description: "Spreadsheet data, analytics" },
+    { name: "JSON Files", extension: ".json", description: "JSON arrays of patient or record data" },
   ]
 
   const processingFeatures = [
     {
       icon: Brain,
-      title: "AI Data Validation",
-      description: "Automatically validates medical data integrity and identifies anomalies",
-    },
-    {
-      icon: Shield,
-      title: "HIPAA Compliance",
-      description: "End-to-end encryption and secure processing of sensitive health data",
+      title: "Smart Processing",
+      description: "Intelligent data parsing and validation",
     },
     {
       icon: Zap,
-      title: "Real-time Processing",
-      description: "Instant data parsing and integration into patient records",
+      title: "Real-time Updates",
+      description: "Track upload progress in real-time",
+    },
+    {
+      icon: Shield,
+      title: "Data Validation",
+      description: "Automatic format and structure verification",
     },
   ]
 
@@ -202,23 +287,40 @@ export default function UploadPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-white">Upload Data</h1>
-          <p className="text-white/60 mt-1">Import patient records, lab results, and medical data</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Shield className="h-5 w-5 text-green-400" />
-          <span className="text-green-400 text-sm">HIPAA Compliant</span>
+          <p className="text-white/60 mt-1">Import and process your data files</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Upload Area */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Data Type Selection */}
+          <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
+            <CardContent className="pt-6">
+              <label className="text-white mb-2 block font-medium">
+                Select Data Type <span className="text-red-400">*</span>
+              </label>
+              <p className="text-white/60 text-sm mb-3">You must select the type of data you are uploading</p>
+              <Select value={dataType} onValueChange={setDataType}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Data Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="record">Medical Records</SelectItem>
+                  <SelectItem value="patient">Patient Data</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
           {/* Drag & Drop Zone */}
-          <Card className="bg-white/5 border-white/10">
+          <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
             <CardContent className="p-8">
               <div
-                className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-                  dragActive ? "border-white/40 bg-white/5" : "border-white/20 hover:border-white/30 hover:bg-white/5"
+                className={`border-2 border-dashed rounded-lg p-12 text-center transition-all duration-200 ${
+                  dragActive
+                    ? "border-white/40 bg-white/5 scale-[0.99] transform"
+                    : "border-white/20 hover:border-white/30 hover:bg-white/5"
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -226,14 +328,16 @@ export default function UploadPage() {
                 onDrop={handleDrop}
               >
                 <Upload className="h-16 w-16 text-white/40 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">Drop files here or click to upload</h3>
-                <p className="text-white/60 mb-6">Support for CSV, JSON, XML, PDF, and Excel files up to 100MB</p>
+                <h3 className="text-xl font-semibold text-white mb-2">Drop JSON files here or click to upload</h3>
+                <p className="text-white/60 mb-2">Only .json files containing arrays of {dataType} data are supported</p>
+                <p className="text-yellow-300/80 text-sm mb-6">Make sure you've selected the correct data type above</p>
                 <Button
                   className="bg-white text-black hover:bg-white/90"
                   onClick={() => document.getElementById("file-input")?.click()}
+                  disabled={isUploading}
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  Choose Files
+                  {isUploading ? "Uploading..." : "Choose Files"}
                 </Button>
                 <input
                   id="file-input"
@@ -241,14 +345,15 @@ export default function UploadPage() {
                   multiple
                   className="hidden"
                   onChange={(e) => e.target.files && handleFiles(e.target.files)}
-                  accept=".csv,.json,.xml,.pdf,.xlsx,.xls"
+                  accept=".json"
+                  disabled={isUploading}
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Uploaded Files */}
-          <Card className="bg-white/5 border-white/10">
+          <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <ImageIcon className="h-5 w-5 mr-2" />
@@ -306,7 +411,7 @@ export default function UploadPage() {
                         </div>
                         <div className="text-center">
                           <div className="text-lg font-semibold text-white">{file.processedData.patientsAffected}</div>
-                          <div className="text-xs text-white/60">Patients Affected</div>
+                          <div className="text-xs text-white/60">Items Processed</div>
                         </div>
                         <div className="text-center">
                           <div className="text-sm font-medium text-white">{file.processedData.dataType}</div>
@@ -324,11 +429,11 @@ export default function UploadPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Processing Features */}
-          <Card className="bg-white/5 border-white/10">
+          <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <Brain className="h-5 w-5 mr-2" />
-                AI Processing
+                Upload Features
               </CardTitle>
               <CardDescription className="text-white/60">Advanced features for data handling</CardDescription>
             </CardHeader>
@@ -348,7 +453,7 @@ export default function UploadPage() {
           </Card>
 
           {/* Supported Formats */}
-          <Card className="bg-white/5 border-white/10">
+          <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-colors">
             <CardHeader>
               <CardTitle className="text-white flex items-center">
                 <ImageIcon className="h-5 w-5 mr-2" />
@@ -368,36 +473,6 @@ export default function UploadPage() {
                   </Badge>
                 </div>
               ))}
-            </CardContent>
-          </Card>
-
-          {/* Upload Statistics */}
-          <Card className="bg-white/5 border-white/10">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center">
-                <Database className="h-5 w-5 mr-2" />
-                Upload Statistics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-white/5 rounded-lg">
-                  <div className="text-lg font-semibold text-white">156</div>
-                  <div className="text-xs text-white/60">Files This Month</div>
-                </div>
-                <div className="text-center p-3 bg-white/5 rounded-lg">
-                  <div className="text-lg font-semibold text-white">2.4GB</div>
-                  <div className="text-xs text-white/60">Data Processed</div>
-                </div>
-                <div className="text-center p-3 bg-white/5 rounded-lg">
-                  <div className="text-lg font-semibold text-white">98.5%</div>
-                  <div className="text-xs text-white/60">Success Rate</div>
-                </div>
-                <div className="text-center p-3 bg-white/5 rounded-lg">
-                  <div className="text-lg font-semibold text-white">1,247</div>
-                  <div className="text-xs text-white/60">Records Added</div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
