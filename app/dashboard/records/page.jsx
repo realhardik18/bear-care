@@ -25,6 +25,8 @@ export default function RecordsPage() {
   const [selectedRecord, setSelectedRecord] = useState(null)
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const resultsPerPage = 5
 
   useEffect(() => {
     async function fetchRecords() {
@@ -63,7 +65,7 @@ export default function RecordsPage() {
         return <CheckCircle className="h-4 w-4 text-green-400" />
       case "elevated":
         return <AlertTriangle className="h-4 w-4 text-yellow-400" />
-      case "improved":
+      case "improved":F
         return <CheckCircle className="h-4 w-4 text-blue-400" />
       default:
         return <Clock className="h-4 w-4 text-gray-400" />
@@ -78,6 +80,13 @@ export default function RecordsPage() {
       (record.unit && record.unit.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (record.date && record.date.toLowerCase().includes(searchQuery.toLowerCase())),
   )
+
+  const paginatedRecords = filteredRecords.slice(
+    (currentPage - 1) * resultsPerPage,
+    currentPage * resultsPerPage,
+  )
+
+  const totalPages = Math.ceil(filteredRecords.length / resultsPerPage)
 
   return (
     <div className="p-6 space-y-6">
@@ -117,12 +126,12 @@ export default function RecordsPage() {
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center text-white/60">Loading records...</CardContent>
             </Card>
-          ) : filteredRecords.length === 0 ? (
+          ) : paginatedRecords.length === 0 ? (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-8 text-center text-white/60">No records found.</CardContent>
             </Card>
           ) : (
-            filteredRecords.map((record) => (
+            paginatedRecords.map((record) => (
               <Card
                 key={record._id}
                 className={`bg-white/5 border-white/10 hover:bg-white/10 transition-all cursor-pointer ${
@@ -171,6 +180,33 @@ export default function RecordsPage() {
                 </CardContent>
               </Card>
             ))
+          )}
+
+          {/* Pagination */}
+          {!loading && filteredRecords.length > 0 && (
+            <div className="flex justify-center space-x-2 mt-4">
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-white border-white/20 hover:bg-white/10"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              >
+                Previous
+              </Button>
+              <span className="text-white">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-white border-white/20 hover:bg-white/10"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              >
+                Next
+              </Button>
+            </div>
           )}
         </div>
 
