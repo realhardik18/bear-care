@@ -5,7 +5,7 @@ import React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { FileText, Clock, Search, Upload, Stethoscope, ChevronLeft, ChevronRight, Home } from "lucide-react"
+import { FileText, Clock, Search, Upload, Stethoscope, ChevronLeft, ChevronRight, Home, MessageCircle } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -13,6 +13,7 @@ import { useUser } from "@clerk/nextjs" // Add this import
 
 const sidebarItems = [
   { icon: Home, label: "Dashboard", href: "/dashboard" },
+  {icon: MessageCircle, label: "Chat", href: "/dashboard/chat" },
   { icon: FileText, label: "Records", href: "/dashboard/records" },
   { icon: Clock, label: "Timeline", href: "/dashboard/timeline" },
   { icon: Search, label: "Search", href: "/dashboard/search" },
