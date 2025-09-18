@@ -11,14 +11,17 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { User, Stethoscope, Award, Bell, Shield, Save, Edit, Camera, Activity, TrendingUp, Clock } from "lucide-react"
+import { useUser } from "@clerk/nextjs"
 
 export default function ProfilePage() {
+  const { user } = useUser()
+
   const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState({
-    firstName: "Sarah",
-    lastName: "Wilson",
-    email: "sarah.wilson@bearcare.com",
-    phone: "+1 (555) 123-4567",
+    firstName: user?.firstName || "Sarah",
+    lastName: user?.lastName || "Wilson",
+    email: user?.emailAddresses?.[0]?.emailAddress || "sarah.wilson@bearcare.com",
+    phone: user?.phoneNumbers?.[0]?.phoneNumber || "+1 (555) 123-4567",
     specialty: "Cardiology",
     license: "MD-12345-CA",
     hospital: "BearCare Medical Center",

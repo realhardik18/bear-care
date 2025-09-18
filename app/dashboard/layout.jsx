@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { FileText, Clock, Search, Upload, Stethoscope, ChevronLeft, ChevronRight, Home } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { useUser } from "@clerk/nextjs" // Add this import
 
 const sidebarItems = [
   { icon: Home, label: "Dashboard", href: "/dashboard" },
@@ -23,6 +24,14 @@ export default function DashboardLayout({
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+  const { user, isLoaded } = useUser(); // Get user data and loading state
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (isLoaded && !user) {
+      router.replace("/sign-in");
+    }
+  }, [isLoaded, user, router]);
 
   return (
     <div className="min-h-screen bg-black text-white flex">
@@ -83,16 +92,24 @@ export default function DashboardLayout({
             >
               <div className="flex items-center space-x-3">
                 <Avatar className="h-8 w-8 transition-transform duration-300 hover:scale-110 border border-white/20">
-                  <AvatarImage src="/caring-doctor.png" />
-                  <AvatarFallback className="bg-white/10 text-white border border-white/20">DR</AvatarFallback>
+                  <AvatarImage src={user?.imageUrl || "/caring-doctor.png"} />
+                  <AvatarFallback className="bg-white/10 text-white border border-white/20">
+                    {user?.firstName?.[0] || "U"}
+                    {user?.lastName?.[0] || ""}
+                  </AvatarFallback>
                 </Avatar>
                 {!collapsed && (
                   <div className="text-left transition-opacity duration-300">
-                    <div className="text-sm font-medium">Dr. Sarah Wilson</div>
-                    <div className="text-xs text-white/60">Cardiologist</div>
+                    <div className="text-sm font-medium">
+                      {user ? `${user.firstName}` : "Loading..."}
+                    </div>
+                    <div className="text-xs text-white/60">
+                      {user?.primaryEmailAddress?.emailAddress || ""}
+                    </div>
                   </div>
                 )}
               </div>
+
             </Button>
           </Link>
         </div>
