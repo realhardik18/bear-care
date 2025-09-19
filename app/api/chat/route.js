@@ -22,36 +22,8 @@ export async function POST(req) {
   let isSuggest = false;
   if (lastUserMsg && lastUserMsg.parts[0].text.trim().toLowerCase().startsWith("suggest:")) {
     isSuggest = true;
-    const query = lastUserMsg.parts[0].text.replace(/^suggest:/i, "").trim();
-    if (query.length > 0) {
-      try {
-        const serpApiKey = process.env.SERPAPI_KEY;
-        if (serpApiKey) {
-          const serpRes = await fetch(`https://serpapi.com/search.json?q=${encodeURIComponent(query + " site:.gov OR site:.edu OR site:.org medical")}&num=5&hl=en&api_key=${serpApiKey}`);
-          if (serpRes.ok) {
-            const serpJson = await serpRes.json();
-            const organic = serpJson.organic_results || [];
-            // Filter for medical-relevant results (simple filter: .gov, .edu, .org, or "health"/"medical" in title)
-            const medicalLinks = organic.filter(r =>
-              r.link &&
-              (
-                r.link.includes(".gov") ||
-                r.link.includes(".edu") ||
-                r.link.includes(".org") ||
-                (r.title && /health|medical|medicine|nih|cdc|who|clinic|hospital/i.test(r.title))
-              )
-            ).slice(0, 3);
-            if (medicalLinks.length > 0) {
-              googleCitations = "\n\n#### References:\n" + medicalLinks.map((r, i) =>
-                `${i + 1}. [${r.title}](${r.link})`
-              ).join("\n");
-            }
-          }
-        }
-      } catch (e) {
-        // Ignore search errors, don't block chat
-      }
-    }
+    // Generate citations using Gemini keywords -> SerpAPI
+    googleCitations = await searchWithKeywords(messages);
   }
 
   const prompt = convertToModelMessages(messages)
@@ -93,8 +65,7 @@ ${
     ? `
 IMPORTANT: The user is asking for suggestions. After your answer, append the following citations as Markdown links under a "References" heading. Do NOT invent or hallucinate citations, only use the provided links.
 
-${googleCitations ? googleCitations : ""}
-`
+${googleCitations ? googleCitations : ""}`
     : ""
 }
 
@@ -119,7 +90,9 @@ Remember: You are an AI assistant. Recommend consulting healthcare professionals
   })
 }
 
-// Function to extract patient IDs from messages
+// ---------------------- New Functions ----------------------
+
+// Extract patient IDs from messages
 function extractPatientIds(messages) {
   const patientIds = new Set();
   const regex = /@(\d+)/g;
@@ -140,7 +113,7 @@ function extractPatientIds(messages) {
   return [...patientIds];
 }
 
-// Function to build patient context from IDs
+// Build patient context from IDs
 async function buildPatientContext(patientIds) {
   let context = "";
 
@@ -182,7 +155,6 @@ async function buildPatientContext(patientIds) {
         if (records && records.length > 0) {
           for (let i = 0; i < records.length; i++) {
             context += `\n--- RECORD ${i + 1} ---\n`;
-            // Simply add the entire record as JSON string
             context += JSON.stringify(records[i], null, 2) + "\n";
           }
         } else {
@@ -197,4 +169,98 @@ async function buildPatientContext(patientIds) {
   }
 
   return context;
+}
+
+// Generate keywords from chat history using Gemini
+async function generateKeywordsFromChat(messages) {
+  try {
+    const keywordPrompt = [
+      {
+        role: "system",
+        content: `You are an AI that extracts crisp, relevant medical search keywords from chat history.
+Return only a short comma-separated list of keywords. No sentences, no explanations.`,
+      },
+      ...convertToModelMessages(messages),
+    ];
+
+    const response = await streamText({
+      model: google("gemini-2.0-flash-exp"),
+      messages: keywordPrompt,
+    });
+
+    let keywords = "";
+    for await (const part of response.textStream) {
+      keywords += part;
+    }
+
+    return keywords.trim();
+  } catch (e) {
+    console.error("Keyword generation failed:", e);
+    return "";
+  }
+}
+
+// Search SerpAPI using the extracted keywords
+async function searchWithKeywords(messages) {
+  const serpApiKey = process.env.SERPAPI_KEY;
+  if (!serpApiKey) {
+    console.log("[Search] SERPAPI_KEY missing.");
+    return "";
+  }
+
+  console.log("[Gemini] Generating keywords from chat history...");
+  const keywords = await generateKeywordsFromChat(messages);
+  console.log("[Gemini] Keywords generated:", keywords);
+
+  if (!keywords) {
+    console.log("[Search] No keywords generated.");
+    return "";
+  }
+
+  try {
+    console.log("[Search] Searching articles with keywords:", keywords);
+    const serpRes = await fetch(
+      `https://serpapi.com/search.json?q=${encodeURIComponent(
+        keywords + " site:.gov OR site:.edu OR site:.org medical"
+      )}&num=5&hl=en&api_key=${serpApiKey}`
+    );
+
+    if (serpRes.ok) {
+      const serpJson = await serpRes.json();
+      const organic = serpJson.organic_results || [];
+
+      // Filter medical links before slicing
+      const filteredLinks = organic
+        .filter(
+          (r) =>
+            r.link &&
+            (r.link.includes(".gov") ||
+              r.link.includes(".edu") ||
+              r.link.includes(".org") ||
+              (r.title &&
+                /health|medical|medicine|nih|cdc|who|clinic|hospital/i.test(
+                  r.title
+                )))
+        );
+      console.log(`[Search] Filtered ${filteredLinks.length} medical articles before slicing.`);
+
+      const medicalLinks = filteredLinks.slice(0, 3);
+
+      console.log(`[Search] Returning ${medicalLinks.length} articles with keywords.`);
+
+      if (medicalLinks.length > 0) {
+        return (
+          "\n\n#### References:\n" +
+          medicalLinks
+            .map((r, i) => `${i + 1}. [${r.title}](${r.link})`)
+            .join("\n")
+        );
+      }
+    } else {
+      console.log("[Search] SerpAPI response not ok.");
+    }
+  } catch (e) {
+    console.error("SerpAPI keyword search failed:", e);
+  }
+  return "";
 }
