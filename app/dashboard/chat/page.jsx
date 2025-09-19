@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -76,6 +76,10 @@ export default function ChatPage() {
   const [loadingPatients, setLoadingPatients] = React.useState(false);
   const [showRecordsModal, setShowRecordsModal] = React.useState(false); // <-- Add this line
   const [collapsedPatientPanel, setCollapsedPatientPanel] = React.useState(false);
+  const [notes, setNotes] = useState([]);
+  const [formatting, setFormatting] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [formattedNotes, setFormattedNotes] = useState("");
   const inputRef = React.useRef(null)
   const messagesContainerRef = React.useRef(null)
   const chatEndRef = React.useRef(null)
@@ -361,6 +365,58 @@ export default function ChatPage() {
     </ReactMarkdown>
   );
 
+  // Notes state
+
+  // Add message to notes
+  const handleAddToNotes = (message) => {
+    setNotes((prev) => [...prev, message]);
+  };
+
+  // Format notes with AI
+  const handleFormatWithAI = async () => {
+    setFormatting(true);
+    try {
+      const res = await fetch("/api/enhance/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes: notes.map(m => m.parts.map(p => p.text).join("\n")) }),
+      });
+      if (res.ok) {
+        // Assume markdown text is returned as plain text for preview
+        const blob = await res.blob();
+        const text = await blob.text();
+        setFormattedNotes(text);
+      }
+    } finally {
+      setFormatting(false);
+    }
+  };
+
+  // Export notes as PDF
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const res = await fetch("/api/enhance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes: notes.map(m => m.parts.map(p => p.text).join("\n")) }),
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "BearCare-Notes.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      }
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-black overflow-hidden">
       {/* Header - Fixed at top */}
@@ -369,10 +425,6 @@ export default function ChatPage() {
           <div>
             <h1 className="text-2xl font-bold text-white">BearCare AI Chat</h1>
             <p className="text-white/60 text-sm">Your intelligent medical assistant for patient care insights</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Shield className="h-4 w-4 text-green-400" />
-            <span className="text-green-400 text-xs font-medium">HIPAA Compliant</span>
           </div>
         </div>
       </div>
@@ -650,7 +702,6 @@ export default function ChatPage() {
                 ))}
               </CardContent>
             </Card>
-
             {/* Patient Context Section */}
             {mentionedPatients.length > 0 && (
               <Card className="bg-black/80 border-white/20">
