@@ -330,7 +330,7 @@ export default function UploadPage() {
                 <Upload className="h-16 w-16 text-white/40 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">Drop JSON files here or click to upload</h3>
                 <p className="text-white/60 mb-2">Only .json files containing arrays of {dataType} data are supported</p>
-                <p className="text-yellow-300/80 text-sm mb-6">Make sure you've selected the correct data type above</p>
+                <p className="text-yellow-300/80 text-sm mb-6">Make sure you&apos;ve selected the correct data type above</p>
                 <Button
                   className="bg-white text-black hover:bg-white/90"
                   onClick={() => document.getElementById("file-input")?.click()}

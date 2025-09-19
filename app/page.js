@@ -5,33 +5,29 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, Brain, HelpCircle, Calendar, ArrowRight, Stethoscope } from "lucide-react"
+import { Search, Brain, Database, FileText, ArrowRight, Stethoscope } from "lucide-react"
 import Link from "next/link"
-import { DotOrbit } from "@paper-design/shaders-react"
+import { Dithering } from '@paper-design/shaders-react'
 
-export default function Home(){
+export default function Home() {
   const [searchQuery, setSearchQuery] = useState("")
 
   const features = [
     {
-      icon: Search,
-      title: "Smart Patient Record Search",
-      description: "Find exactly what matters in any patient's FHIR record — fast.",
+      icon: Database,
+      title: "Local FHIR Knowledge Base",
+      description: "Access and analyze patient records from your local FHIR database seamlessly.",
       visual: (
         <div className="space-y-2">
-          <div className="flex items-center space-x-2 bg-white/5 rounded-lg p-2 border border-white/10">
-            <Search className="h-4 w-4 text-white/70" />
-            <Input
-              placeholder="Search patient records..."
-              className="border-0 bg-transparent text-sm text-white placeholder:text-white/50"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
           <div className="bg-white/5 rounded-lg p-3 border border-white/20">
-            <div className="text-sm font-medium text-white">John Doe - ID: 12345</div>
+            <div className="text-sm font-medium text-white">Local FHIR Database</div>
             <div className="text-xs text-white/70 mt-1">
-              <span className="bg-white/10 text-white px-2 py-1 rounded border border-white/20">Diabetes</span>
+              <Badge variant="outline" className="mr-1 border-white/20 text-white bg-white/5">
+                1000+ Records
+              </Badge>
+              <Badge variant="outline" className="border-white/20 text-white bg-white/5">
+                Real-time Sync
+              </Badge>
             </div>
           </div>
         </div>
@@ -39,67 +35,59 @@ export default function Home(){
     },
     {
       icon: Brain,
-      title: "AI-Powered Care Recommendations",
-      description: "Get 3 evidence-backed treatment options instantly.",
+      title: "AI-Powered Patient Analysis",
+      description: "Extract meaningful insights from patient histories automatically.",
       visual: (
         <div className="space-y-2">
-          {[
-            { treatment: "Metformin 500mg", confidence: "95%" },
-            { treatment: "Lifestyle modification", confidence: "88%" },
-          ].map((rec, i) => (
-            <Card key={i} className="bg-white/5 border-white/10">
-              <CardContent className="p-3">
-                <div className="flex justify-between items-start">
-                  <div className="text-sm font-medium text-white">{rec.treatment}</div>
-                  <Badge variant="outline" className="text-xs border-white/20 text-white bg-white/5">
-                    {rec.confidence}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-3">
+              <div className="text-sm font-medium text-white mb-2">Patient Insights</div>
+              <div className="text-xs text-white/70">
+                • Treatment effectiveness patterns<br />
+                • Risk factor analysis<br />
+                • Outcome predictions
+              </div>
+            </CardContent>
+          </Card>
         </div>
       ),
     },
     {
-      icon: HelpCircle,
-      title: "Explainable Insights",
-      description: "Understand why each recommendation was suggested — no black boxes.",
+      icon: FileText,
+      title: "Smart Documentation",
+      description: "AI-assisted medical documentation with citation support.",
       visual: (
         <Card className="bg-white/5 border-white/10">
           <CardContent className="p-3">
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="text-sm font-medium text-white">Metformin 500mg</div>
-                <div className="text-xs text-white/70">Evidence-based</div>
+            <div className="text-sm font-medium text-white mb-2">Recent Citations</div>
+            <div className="text-xs text-white/70">
+              <div className="flex items-center space-x-2 mb-1">
+                <Badge variant="outline" className="border-white/20 text-white bg-white/5">NEJM</Badge>
+                <span>2024 Treatment Guidelines</span>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs bg-white/5 border-white/20 text-white hover:bg-white/10"
-              >
-                <HelpCircle className="h-3 w-3 mr-1" />
-                Why?
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Badge variant="outline" className="border-white/20 text-white bg-white/5">Lancet</Badge>
+                <span>Clinical Trial Results</span>
+              </div>
             </div>
           </CardContent>
         </Card>
       ),
     },
     {
-      icon: Calendar,
-      title: "Appointment & Workflow Integration",
-      description: "See today's appointments and patient details in one dashboard.",
+      icon: Search,
+      title: "Contextual Search",
+      description: "Find relevant patient information with natural language queries.",
       visual: (
-        <div className="bg-white/5 rounded-lg p-2 border border-white/10">
-          <div className="text-xs font-medium mb-2 text-white">Today's Schedule</div>
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="text-white">9:00 AM - Sarah Johnson</span>
-              <Badge variant="outline" className="text-xs border-white/20 text-white bg-white/5">
-                Checkup
-              </Badge>
-            </div>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2 bg-white/5 rounded-lg p-2 border border-white/10">
+            <Search className="h-4 w-4 text-white/70" />
+            <Input
+              placeholder="Search patient history..."
+              className="border-0 bg-transparent text-sm text-white placeholder:text-white/50"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
       ),
@@ -115,14 +103,14 @@ export default function Home(){
           <span className="text-2xl font-bold">BearCare</span>
         </div>
         <div className="flex items-center space-x-4 animate-fade-in-up animate-delay-100">
-          <Button variant="ghost" className="text-white hover:bg-white/10 transition-all duration-300">
+          <Button variant="ghost" className="text-white hover:bg-purple-800/30 transition-all duration-300">
             Features
           </Button>
-          <Button variant="ghost" className="text-white hover:bg-white/10 transition-all duration-300">
+          <Button variant="ghost" className="text-white hover:bg-purple-800/30 transition-all duration-300">
             Pricing
           </Button>
           <Link href="/dashboard">
-            <Button className="bg-white text-black hover:bg-white/90 transition-all duration-300 hover:scale-105">
+            <Button className="bg-purple-600 text-white hover:bg-purple-500 transition-all duration-300 hover:scale-105">
               Dashboard
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -132,34 +120,35 @@ export default function Home(){
 
       {/* Hero Section */}
       <section className="relative z-10 text-center py-20 px-6 overflow-hidden">
-        {/* DotOrbit background only for hero */}
         <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
-          <DotOrbit
-            height={typeof window !== "undefined" ? window.innerHeight * 0.6 : 600}
-            colors={["#ffffff", "#006aff", "#fff675"]}
+          <Dithering
+            height={500}
             colorBack="#000000"
-            stepsPerColor={4}
-            size={0.3}
-            sizeRange={0.2}
-            spreading={1}
-            scale={0.4}
-            speed={0.1}
+            colorFront="#f2f2f2"
+            shape="warp"
+            type="4x4"
+            pxSize={2}
+            offsetX={0}
+            offsetY={0}
+            scale={0.6}
+            rotation={0}
+            speed={1}
           />
         </div>
         <div className="relative z-10 max-w-4xl mx-auto">
           <h1 className="text-6xl font-bold mb-6 text-balance animate-fade-in-up">
-            AI-Powered Healthcare
-            <span className="block text-white/80">Made Simple</span>
+            Deep Patient Insights
+            <span className="block text-white/80">Powered by AI</span>
           </h1>
           <p className="text-xl text-white/70 mb-8 max-w-2xl mx-auto text-pretty animate-fade-in-up animate-delay-100">
-            Transform patient care with intelligent record search, evidence-based recommendations, and explainable AI
-            insights — all in one seamless platform.
+            Leverage your local FHIR database with AI-powered analysis for deeper understanding of patient histories,
+            treatment patterns, and evidence-based insights.
           </p>
           <div className="flex justify-center space-x-4 animate-fade-in-up animate-delay-200">
             <Link href="/dashboard">
               <Button
                 size="lg"
-                className="bg-white text-black hover:bg-white/90 transition-all duration-300 hover:scale-105"
+                className="bg-purple-600 text-white hover:bg-purple-500 transition-all duration-300 hover:scale-105"
               >
                 Try Dashboard
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -168,7 +157,7 @@ export default function Home(){
             <Button
               size="lg"
               variant="outline"
-              className="border-white/20 text-white hover:bg-white/10 bg-transparent transition-all duration-300 hover:scale-105"
+              className="border-purple-400/20 text-white hover:bg-purple-800/30 bg-transparent transition-all duration-300 hover:scale-105"
             >
               Watch Demo
             </Button>
@@ -221,7 +210,7 @@ export default function Home(){
           <Link href="/dashboard">
             <Button
               size="lg"
-              className="bg-white text-black hover:bg-white/90 transition-all duration-300 hover:scale-105"
+              className="bg-purple-600 text-white hover:bg-purple-500 transition-all duration-300 hover:scale-105"
             >
               Get Started Now
               <ArrowRight className="ml-2 h-5 w-5" />

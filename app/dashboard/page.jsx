@@ -162,7 +162,7 @@ export default function DashboardPage() {
                 <CheckCircle className="h-5 w-5 text-green-400" />
                 <span className="font-medium text-green-400">Treatment Success</span>
               </div>
-              <p className="text-sm text-white/80">Patient John Doe's diabetes management showing 15% improvement</p>
+              <p className="text-sm text-white/80">Patient John Doe&apos;s diabetes management showing 15% improvement</p>
             </div>
             <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
               <div className="flex items-center space-x-2 mb-2">
