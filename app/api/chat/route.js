@@ -15,6 +15,45 @@ export async function POST(req) {
     patientContext = await buildPatientContext(patientIds);
   }
 
+  // --- SUGGEST FEATURE: Google Search and Citation ---
+  // Check if the latest user message starts with "suggest:"
+  const lastUserMsg = messages.slice().reverse().find(m => m.role === "user" && m.parts && m.parts.length > 0 && m.parts[0].type === "text");
+  let googleCitations = "";
+  let isSuggest = false;
+  if (lastUserMsg && lastUserMsg.parts[0].text.trim().toLowerCase().startsWith("suggest:")) {
+    isSuggest = true;
+    const query = lastUserMsg.parts[0].text.replace(/^suggest:/i, "").trim();
+    if (query.length > 0) {
+      try {
+        const serpApiKey = process.env.SERPAPI_KEY;
+        if (serpApiKey) {
+          const serpRes = await fetch(`https://serpapi.com/search.json?q=${encodeURIComponent(query + " site:.gov OR site:.edu OR site:.org medical")}&num=5&hl=en&api_key=${serpApiKey}`);
+          if (serpRes.ok) {
+            const serpJson = await serpRes.json();
+            const organic = serpJson.organic_results || [];
+            // Filter for medical-relevant results (simple filter: .gov, .edu, .org, or "health"/"medical" in title)
+            const medicalLinks = organic.filter(r =>
+              r.link &&
+              (
+                r.link.includes(".gov") ||
+                r.link.includes(".edu") ||
+                r.link.includes(".org") ||
+                (r.title && /health|medical|medicine|nih|cdc|who|clinic|hospital/i.test(r.title))
+              )
+            ).slice(0, 3);
+            if (medicalLinks.length > 0) {
+              googleCitations = "\n\n#### References:\n" + medicalLinks.map((r, i) =>
+                `${i + 1}. [${r.title}](${r.link})`
+              ).join("\n");
+            }
+          }
+        }
+      } catch (e) {
+        // Ignore search errors, don't block chat
+      }
+    }
+  }
+
   const prompt = convertToModelMessages(messages)
 
   const result = streamText({
@@ -48,6 +87,16 @@ Capabilities:
 - Maintain HIPAA compliance and patient privacy
 
 ${patientContext ? `\nPatient Context:\n${patientContext}\n` : ""}
+
+${
+  isSuggest
+    ? `
+IMPORTANT: The user is asking for suggestions. After your answer, append the following citations as Markdown links under a "References" heading. Do NOT invent or hallucinate citations, only use the provided links.
+
+${googleCitations ? googleCitations : ""}
+`
+    : ""
+}
 
 Always:
 1. Give crisp, actionable medical information (under 100 words when possible)

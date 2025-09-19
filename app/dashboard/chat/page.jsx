@@ -168,26 +168,9 @@ export default function ChatPage() {
     setInput("")
   }
 
-  const handleExplain = () => {
-    if (messages.length === 0) {
-      sendMessage({ text: "Please explain how you can help me with medical reasoning and context." })
-      return
-    }
-    const lastAssistantMessage = messages.filter((m) => m.role === "assistant").pop()
-    if (lastAssistantMessage) {
-      sendMessage({ text: "Please explain your previous response in more detail with medical reasoning and context." })
-    }
-  }
-
-  const handleCite = () => {
-    if (messages.length === 0) {
-      sendMessage({ text: "Please provide information about the medical sources and references you use." })
-      return
-    }
-    const lastAssistantMessage = messages.filter((m) => m.role === "assistant").pop()
-    if (lastAssistantMessage) {
-      sendMessage({ text: "Please provide medical sources, references, and evidence for your previous response." })
-    }
+  // Remove handleExplain and handleCite, add handleSuggest
+  const handleSuggest = () => {
+    sendMessage({ text: "suggest: suggest 3 ways to fix this issue" });
   }
 
   const handleSuggestedQuestion = (question) => {
@@ -626,22 +609,13 @@ export default function ChatPage() {
               {/* Action Buttons */}
               <div className="flex items-center space-x-2">
                 <Button
-                  onClick={handleExplain}
+                  onClick={handleSuggest}
                   disabled={status === "in_progress" || fetchingContext}
                   className="bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600/30 hover:scale-105 transition-all duration-200 rounded-xl px-3 py-3"
-                  title="Explain the last AI response in detail"
+                  title="Suggest 3 ways to fix this issue"
                 >
                   <Info className="h-4 w-4" />
                 </Button>
-                <Button
-                  onClick={handleCite}
-                  disabled={status === "in_progress" || fetchingContext}
-                  className="bg-blue-600/20 text-blue-300 border border-blue-500/30 hover:bg-blue-600/30 hover:scale-105 transition-all duration-200 rounded-xl px-3 py-3"
-                  title="Show sources and references"
-                >
-                  <BookOpen className="h-4 w-4" />
-                </Button>
-                {/* Removed AtSign button */}
               </div>
             </div>
           </div>
