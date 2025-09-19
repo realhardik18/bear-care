@@ -9,9 +9,18 @@ export async function GET(req) {
     // Parse query params
     const { searchParams } = new URL(req.url);
     const filter = {};
+
+    // Special handling for patientId parameter
+    const patientId = searchParams.get('patientId');
+    if (patientId) {
+      filter.patientId = isNaN(Number(patientId)) ? patientId : Number(patientId);
+    }
+
+    // Process other parameters
     for (const [key, value] of searchParams.entries()) {
-      // Try to parse as number, fallback to string
-      filter[key] = isNaN(Number(value)) ? value : Number(value);
+      if (key !== 'patientId') { // Skip patientId as we've already handled it
+        filter[key] = isNaN(Number(value)) ? value : Number(value);
+      }
     }
 
     const records = await collection.find(filter).toArray();

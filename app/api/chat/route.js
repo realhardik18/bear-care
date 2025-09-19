@@ -1,10 +1,19 @@
 import { google } from "@ai-sdk/google"
-import { convertToModelMessages, streamText,UIMessage } from "ai"
+import { convertToModelMessages, streamText, UIMessage } from "ai"
 
 export const maxDuration = 30
 
 export async function POST(req) {
   const { messages } = await req.json()
+
+  // Extract patient IDs mentioned in the conversation
+  const patientIds = extractPatientIds(messages);
+  let patientContext = "";
+
+  // If there are patient IDs, get their information to add to the system prompt
+  if (patientIds.length > 0) {
+    patientContext = await buildPatientContext(patientIds);
+  }
 
   const prompt = convertToModelMessages(messages)
 
@@ -13,23 +22,39 @@ export async function POST(req) {
     messages: [
       {
         role: "system",
-        content: `You are BearCare AI, a medical assistant specialized in healthcare data analysis and patient care recommendations.
+        content: `You are BearCare AI, a medical assistant specialized in healthcare data analysis and patient care recommendations You are also a healthcare professional.
 
-Key capabilities:
+Instructions:
+- Use only the provided patient context and do not speculate or invent information.
+- Provide clear, concise, and semi-formal medical information and recommendations.
+- Reply in Markdown format for readability (use lists, bold, headings, etc. where appropriate).
+- If the user requests a graph, chart, or visualization, reply with a Markdown code block using the language 'chartjs' and provide a valid Chart.js config as JSON. Example:
+
+\`\`\`chartjs
+{
+  "type": "bar",
+  "data": { "labels": ["A", "B"], "datasets": [{ "label": "Example", "data": [1,2] }] }
+}
+\`\`\`
+
+- Do not repeat the same disclaimers or information in every message.
+- Be straight to the point and avoid unnecessary repetition.
+- If information is missing, state only what is available in the context.
+
+Capabilities:
 - Analyze patient FHIR records and medical data
 - Provide evidence-based treatment recommendations
 - Explain medical insights in clear, professional language
 - Maintain HIPAA compliance and patient privacy
-- Focus on actionable healthcare insights
 
-Always provide:
-1. Clear, concise medical information
-2. Evidence-based recommendations when appropriate
-3. Explanations for your reasoning
-4. Appropriate medical disclaimers when giving clinical advice
-5. give each answer crisp and short in under 100 words
+${patientContext ? `\nPatient Context:\n${patientContext}\n` : ""}
 
-Remember: You are an AI assistant and should always recommend consulting with healthcare professionals for medical decisions.`,
+Always:
+1. Give crisp, actionable medical information (under 100 words when possible)
+2. Reference evidence or reasoning when appropriate
+3. Use Markdown formatting for clarity
+
+Remember: You are an AI assistant. Recommend consulting healthcare professionals for medical decisions.`,
       },
       ...prompt,
     ],
@@ -43,4 +68,84 @@ Remember: You are an AI assistant and should always recommend consulting with he
       }
     },
   })
+}
+
+// Function to extract patient IDs from messages
+function extractPatientIds(messages) {
+  const patientIds = new Set();
+  const regex = /@(\d+)/g;
+
+  for (const message of messages) {
+    if (message.parts) {
+      for (const part of message.parts) {
+        if (part.type === "text") {
+          let match;
+          while ((match = regex.exec(part.text)) !== null) {
+            patientIds.add(match[1]);
+          }
+        }
+      }
+    }
+  }
+
+  return [...patientIds];
+}
+
+// Function to build patient context from IDs
+async function buildPatientContext(patientIds) {
+  let context = "";
+
+  try {
+    for (const id of patientIds) {
+      // Fetch patient details
+      const patientResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/patients?id=${id}`);
+
+      // Fetch patient records
+      const recordsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/records?id=${id}`);
+
+      if (patientResponse.ok && recordsResponse.ok) {
+        const patient = await patientResponse.json();
+        const records = await recordsResponse.json();
+
+        context += `### PATIENT INFORMATION ###\n`;
+        context += `Patient ID: ${id}\n`;
+        context += `Name: ${patient.name || "Unknown"}\n`;
+        context += `Age: ${patient.age || "Unknown"} years\n`;
+        context += `Birth Date: ${patient.birthDate || "Unknown"}\n`;
+        context += `Gender: ${patient.gender === 'm' ? 'Male' : patient.gender === 'f' ? 'Female' : patient.gender || "Unknown"}\n`;
+        context += `Contact: ${patient.telecom || "Unknown"}\n`;
+
+        if (patient.conditions && patient.conditions.length > 0) {
+          context += `\nMedical Conditions:\n`;
+          patient.conditions.forEach(condition => {
+            context += `- ${condition}\n`;
+          });
+        }
+
+        if (patient.medications && patient.medications.length > 0) {
+          context += `\nCurrent Medications:\n`;
+          patient.medications.forEach(med => {
+            context += `- ${med}\n`;
+          });
+        }
+
+        context += `\n### START OF PATIENT ${id} RECORDS ###\n`;
+        if (records && records.length > 0) {
+          for (let i = 0; i < records.length; i++) {
+            context += `\n--- RECORD ${i + 1} ---\n`;
+            // Simply add the entire record as JSON string
+            context += JSON.stringify(records[i], null, 2) + "\n";
+          }
+        } else {
+          context += `No medical records available for this patient.\n`;
+        }
+        context += `### END OF PATIENT ${id} RECORDS ###\n\n`;
+      }
+    }
+  } catch (error) {
+    console.error("Error building patient context:", error);
+    context += "Note: There was an error retrieving complete patient data.\n";
+  }
+
+  return context;
 }

@@ -52,10 +52,29 @@ export async function GET(req) {
     // Get query parameters
     const url = new URL(req.url);
     const id = url.searchParams.get('id');
+    const search = url.searchParams.get('search');
+
+    // If a search term is provided, search by name or id
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      const searchQuery = {
+        $or: [
+          { name: { $regex: searchRegex } },
+          { id: isNaN(Number(search)) ? search : Number(search) }
+        ]
+      };
+
+      const patients = await patientsCollection.find(searchQuery)
+        .limit(10)
+        .toArray();
+
+      return NextResponse.json(patients, { status: 200 });
+    }
 
     // If an ID is provided, return that specific patient
     if (id) {
-      const patient = await patientsCollection.findOne({ id });
+      const patientId = isNaN(Number(id)) ? id : Number(id);
+      const patient = await patientsCollection.findOne({ id: patientId });
       if (!patient) {
         return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
       }
